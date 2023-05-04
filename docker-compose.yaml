@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:13.3
+    container_name: postgres_DB
+    env_file: .env
+    volumes:
+        - \pgdata\var\lib\postgresql\data
+    hostname: postgres
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+
+  django:
+    &django
+    build:
+      context: .
+    image: pro_django
+    container_name: django
+    env_file: .env
+    volumes:
+      - ./:/app/
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    command: sh -c "python manage.py makemigrations &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
